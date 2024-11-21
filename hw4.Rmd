@@ -1,0 +1,46 @@
+---
+title: "hw4"
+author: Student 1 and Student 2
+output: pdf_document
+date: "2024-11-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+data <- read.table("gauge.txt",  header = TRUE)
+```
+
+# 0. Contribution Statement
+
+## Student 1
+
+Student 1 mainly worked on questions...
+
+## Student 2
+
+Student 2 mainly worked on questions ...
+
+\pagebreak
+
+\pagenumbering{arabic}
+
+# Introduction
+
+### Data
+
+### Objective
+
+\pagebreak
+
+# Basic Analysis
+
+## Question 1: RAW DATA
+### Methods
+```{r}
+model <- lm(gain ~ density, data = data) # fit a regression model
+summary(model)
+
+# graph: scatterplot
+plot(data$density, data$gain, main = 'TYPE TITLE HERE', xlab = 'TYPE X-AXIS HERE', ylab = 'TYPE Y-AXIS HERE')
+abline(model, col = 'red') # plot line of best fit
+```
