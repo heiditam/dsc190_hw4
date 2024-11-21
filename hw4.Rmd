@@ -44,3 +44,17 @@ summary(model)
 plot(data$density, data$gain, main = 'TYPE TITLE HERE', xlab = 'TYPE X-AXIS HERE', ylab = 'TYPE Y-AXIS HERE')
 abline(model, col = 'red') # plot line of best fit
 ```
+
+## Question 2: TRANSFORMED DATA
+
+## Question 3: ROBUSTNESS
+
+## Question 4: FORWARD PREDICTION
+
+## Question 5: REVERSE PREDICTION
+
+## Question 6: CROSS-VALIDATION
+
+# Advanced Analysis
+
+# Conclusion & Discussion
