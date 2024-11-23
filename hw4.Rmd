@@ -193,6 +193,9 @@ print(shapiro_result_noise)
 ```
 Since the p-value = 0.9707 > 0.05, we reject the null hypothesis. The residuals are normally distributed, so accounting for variations in the densities of the polyethylene blocks _does_ result in a more accurate fit.
 
+### Conclusion
+We created a new model under the assumption that densities of the polyethylene blocks were not reported exactly. Since the residuals closely align the 45-degree line in the QQ plot and a Shapiro-Wilk test confirms the residuals are normally distributed, our new fitted model that accounts for variation in densities performs _better_ than without accounting for variations. 
+
 ## Question 4: FORWARD PREDICTION
 
 ## Question 5: REVERSE PREDICTION
