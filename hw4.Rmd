@@ -82,7 +82,7 @@ print(shapiro_result)
 With a p-value of 4.599 * 10^(-9) < 0.05, we reject the null hypothesis. This suggests our data is _not_ normally distributed. 
 
 ### Conclusion
-A transformation may be necessary because a visual graph shows our fitted model _overestimates_ many of our data points since our data is nonlinear and concaved up. A plot of the residuals with the predicted gamma ray intensity also shows that our plot is not homoscedastic, and a QQ plot highlights that our residuals are also not normally distributed. This means our data failed the linearity, heteroscedisticity, and normality conditions. Since a Shapiro-Wilk test confirmed that our data is not normal, we must transform our data to help normalize it. 
+A transformation may be necessary because a visual graph shows our fitted model _overestimates_ many of our data points since our data is nonlinear and concaved up. A plot of the residuals with the predicted gamma ray intensity also shows that our plot is not homoscedastic, and a QQ plot highlights that our residuals are also not normally distributed. This means our data failed the linearity, heteroscedasticity, and normality conditions. Since a Shapiro-Wilk test confirmed that our data is not normal, we must transform our data to help normalize it. 
 
 ## Question 2: TRANSFORMED DATA
 
@@ -116,7 +116,7 @@ qqnorm(res)
 qqline(res)
 ```
 
-The plot of the residuals and the QQ plot also support the idea that the data is now linear after the log transfomation, as the resisuals are more randomly scattered and they fall close to the normal line on the QQ plot.
+The plot of the residuals and the QQ plot also support the idea that the data is now linear after the log transformation, as the resisuals are more randomly scattered and they fall close to the normal line on the QQ plot.
 
 ### Analysis
 
@@ -127,13 +127,71 @@ set.seed(123)
 shapiro_result <- shapiro.test(data$lggain)
 print(shapiro_result)
 ```
-With a p-value of 0.0002461< 0.05, we reject the null hypothesis. Although this suggests that our data is _not_ normally distributed, it is a vast improvement from the previous p-value of 4.599 * 10ˆ(-9). 
+With a p-value of 0.0002461< 0.05, we reject the null hypothesis. Although this suggests that the residuals our data is _not_ normally distributed, it is a vast improvement from the previous p-value of 4.599 * 10ˆ(-9). 
 
 ### Conclusion
 
-The log transformation on predicted gamma ray density is an appropriate for fitting the data to a linear model. The visualizations of the model itself, its residuals, as well as a QQ plot show us that the log transformation allowed the data to fit a linear model very well. Although the log transfomation failed to completely transform the distribution of predicted gamma ray density into a normal distribution, it significantly reduced the non-linearity of its distribution. 
+The log transformation on predicted gamma ray density is appropriate for fitting the data to a linear model. The visualizations of the model itself, its residuals, as well as a QQ plot show us that the log transformation allowed the data to fit a linear model very well. Although the log transformation failed to completely transform the distribution of predicted gamma ray density into a normal distribution, it significantly reduced the non-linearity of its distribution. 
 
 ## Question 3: ROBUSTNESS
+### Methods
+If the densities of the polyethylene blocks are not reported exactly, we can use the error term in the prediction interval to take into account the variability in the gamma ray intensity (the gain).
+```{r}
+# Define true relationship parameters (arbitrarily chosen)
+A <- 150
+beta <- -0.05
+n <- 90
+
+# GENERATING SYNTHETIC DATA
+set.seed(123)
+# DENSITY - use the density given from the dataset
+true_densities <- data$density
+
+# Simulate measurement errors
+# Set the mean to 0 to simulate unbiased random errors
+density_noise <- rnorm(n, mean = 0, sd = 0.05)
+recorded_densities <- true_densities + density_noise # observed x with noise
+
+# GAINS - based on the equation g = Ae^(beta *d)
+true_gains <- A * exp(beta * true_densities) # theoretical values, no noise
+
+# Fit the exponential model to the noisy data
+noise_fit <- lm(log(true_gains) ~ recorded_densities)
+fitted_gains <- exp(coef(noise_fit)[1]) * exp(coef(noise_fit)[2] * recorded_densities) # predicted y with noise
+```
+We have generated synthetic data that includes noise for the densities, fit a model to predict gains based on the densities with noise, and created predictions of the gains using the newly fitted model.
+
+```{r}
+library(ggplot2)
+noise_data <- data.frame(Density = recorded_densities, True_Gains = true_gains, Fitted_Gains = fitted_gains)
+ggplot(noise_data, aes(x = Density)) +
+  geom_point(aes(y = True_Gains, color = "True Gains"), size = 2) +
+  geom_line(aes(y = Fitted_Gains, color = "Fitted Gains"), size = 1) +
+  labs(
+    title = 'Gamma Ray Intensity as a Function of Density',
+    y = 'Observed Gamma Ray Intensity (Gain)'
+  )
+```
+Based on the graph above, our new model that accounts for noise in density closely predicts the true gains from our dataset! Below, we will plot the residuals of the model. 
+
+```{r echo=FALSE}
+res_noise <- resid(noise_fit)
+plot(fitted(noise_fit), res_noise, xlab='Predicted Gamma Ray Intensity', ylab = 'Residuals', main = 'Residual vs. Fitted Plot of Log Model with Noise')
+abline(0,0)
+```
+```{r echo=FALSE}
+qqnorm(res_noise)
+qqline(res_noise)
+```
+After accounting for noise, it seems as though our residuals follow the line y = x more closely; our residuals are closer to being normally distributed than in our previous model. 
+### Analysis
+We will extract the residuals from our model that accounts for noise in density and use the ```{r} shapiro.test()``` function on the residuals. Our null hypothesis is that the residuals are normally distributed.
+```{r}
+set.seed(123)
+shapiro_result_noise <- shapiro.test(res_noise)
+print(shapiro_result_noise)
+```
+Since the p-value = 0.9707 > 0.05, we reject the null hypothesis. The residuals are normally distributed, so accounting for variations in the densities of the polyethylene blocks _does_ result in a more accurate fit.
 
 ## Question 4: FORWARD PREDICTION
 
