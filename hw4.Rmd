@@ -36,14 +36,44 @@ Student 2 mainly worked on questions ...
 
 ## Question 1: RAW DATA
 ### Methods
+We will plot the data points and fit the regression line.
 ```{r}
 model <- lm(gain ~ density, data = data) # fit a regression model
 summary(model)
 
 # graph: scatterplot
-plot(data$density, data$gain, main = 'TYPE TITLE HERE', xlab = 'TYPE X-AXIS HERE', ylab = 'TYPE Y-AXIS HERE')
+plot(data$density, data$gain, main = 'Gamma Ray Intensity as a Function of the Density of Polyethylene Blocks', xlab = 'Density of Polyethylene Blocks', ylab = 'Gamma Ray Intensity')
 abline(model, col = 'red') # plot line of best fit
 ```
+We will extract residuals from the model and observe the residual vs. fitted plot (the predicted values) to understand whether our model has a good fit. 
+```{r}
+res <- resid(model)
+plot(fitted(model), res, xlab='Predicted Gamma Ray Intensity', ylab = 'Residuals', main = 'Residual vs. Fitted Plot of Model')
+abline(0,0)
+```
+There is a very clear nonlinear pattern between the predicted values from the model and the residuals, which suggests the current model is inappropriate for the data since the relationship between the response variable and the residuals are not linear. There is also homoscedasticity present since the residuals do not vary constantly; some are further or closer away than others, as shown in the graph. 
+
+Additionally, we can plot a QQ plot to check if the residuals are normally distributed.
+```{r}
+qqnorm(res)
+qqline(res)
+```
+In general, the points on the plot do not fall closely to the line. The points form an 'S-shape', are staggered, and clearly deviate from the 45-degree reference line, which indicates the residuals not normally distributed. 
+```{r}
+plot(density(res))
+```
+A density plot of our residuals shows that the density of our residuals is skewed right, meaning most of our observed results were below the predicted value (overestimate). We can confirm this by checking our regression line plotted with the observed values. Since the data was concaved up, our regression line was higher than most of the points in the center of the plot.
+
+### Analysis
+We will need to transform our data if our data is skewed and does not resemble a bell curve. We can test whether our data comes from a normally distributed population with a Shapiro-Wilk test. Our null hypothesis is that our data does come from a normally distributed population.
+```{r}
+set.seed(123)
+shapiro_result <- shapiro.test(data$gain)
+```
+With a p-value of 4.599 * 10^(-9) < 0.05, we reject the null hypothesis. This suggests our data is _not_ normally distributed. 
+
+### Conclusion
+A transformation may be necessary because a visual graph shows our fitted model _overestimates_ many of our data points since our data is nonlinear and concaved up. A plot of the residuals with the predicted gamma ray intensity also shows that our plot is not homoscedastic, and a QQ plot highlights that our residuals are also not normally distributed. This means our data failed the linearity, heteroscedisticity, and normality conditions. Since a Shapiro-Wilk test confirmed that our data is not normal, we must transform our data to help normalize it. 
 
 ## Question 2: TRANSFORMED DATA
 
