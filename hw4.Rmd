@@ -37,7 +37,7 @@ Student 2 mainly worked on questions ...
 ## Question 1: RAW DATA
 ### Methods
 We will plot the data points and fit the regression line.
-```{r}
+```{r echo=FALSE}
 model <- lm(gain ~ density, data = data) # fit a regression model
 summary(model)
 
@@ -45,30 +45,39 @@ summary(model)
 plot(data$density, data$gain, main = 'Gamma Ray Intensity as a Function of the Density of Polyethylene Blocks', xlab = 'Density of Polyethylene Blocks', ylab = 'Gamma Ray Intensity')
 abline(model, col = 'red') # plot line of best fit
 ```
+
 We will extract residuals from the model and observe the residual vs. fitted plot (the predicted values) to understand whether our model has a good fit. 
-```{r}
+
+```{r echo=FALSE}
 res <- resid(model)
 plot(fitted(model), res, xlab='Predicted Gamma Ray Intensity', ylab = 'Residuals', main = 'Residual vs. Fitted Plot of Model')
 abline(0,0)
 ```
+
 There is a very clear nonlinear pattern between the predicted values from the model and the residuals, which suggests the current model is inappropriate for the data since the relationship between the response variable and the residuals are not linear. There is also homoscedasticity present since the residuals do not vary constantly; some are further or closer away than others, as shown in the graph. 
 
 Additionally, we can plot a QQ plot to check if the residuals are normally distributed.
-```{r}
+
+```{r echo = FALSE}
 qqnorm(res)
 qqline(res)
 ```
+
 In general, the points on the plot do not fall closely to the line. The points form an 'S-shape', are staggered, and clearly deviate from the 45-degree reference line, which indicates the residuals not normally distributed. 
-```{r}
+
+```{r echo=FALSE}
 plot(density(res))
 ```
+
 A density plot of our residuals shows that the density of our residuals is skewed right, meaning most of our observed results were below the predicted value (overestimate). We can confirm this by checking our regression line plotted with the observed values. Since the data was concaved up, our regression line was higher than most of the points in the center of the plot.
 
 ### Analysis
 We will need to transform our data if our data is skewed and does not resemble a bell curve. We can test whether our data comes from a normally distributed population with a Shapiro-Wilk test. Our null hypothesis is that our data does come from a normally distributed population.
+
 ```{r}
 set.seed(123)
 shapiro_result <- shapiro.test(data$gain)
+print(shapiro_result)
 ```
 With a p-value of 4.599 * 10^(-9) < 0.05, we reject the null hypothesis. This suggests our data is _not_ normally distributed. 
 
@@ -76,6 +85,53 @@ With a p-value of 4.599 * 10^(-9) < 0.05, we reject the null hypothesis. This su
 A transformation may be necessary because a visual graph shows our fitted model _overestimates_ many of our data points since our data is nonlinear and concaved up. A plot of the residuals with the predicted gamma ray intensity also shows that our plot is not homoscedastic, and a QQ plot highlights that our residuals are also not normally distributed. This means our data failed the linearity, heteroscedisticity, and normality conditions. Since a Shapiro-Wilk test confirmed that our data is not normal, we must transform our data to help normalize it. 
 
 ## Question 2: TRANSFORMED DATA
+
+### Methods
+To find a fitting transformation for our data, we experimented with a log transformation on gain and graphed lines of best fit.
+
+```{r echo=FALSE}
+data$lggain <- log(data$gain)
+log_model <- lm(lggain ~ density, data = data) # fit a regression model
+summary(log_model)
+
+# graph: scatterplot
+plot(data$density, data$lggain, main = 'Log Gamma Ray Intensity as a Function of the Density of Polyethylene Blocks', xlab = 'Density of Polyethylene Blocks', ylab = 'Log of Gamma Ray Intensity')
+abline(log_model, col = 'red') # plot line of best fit
+```
+
+After performing a log transformation on the measured gamma ray intensity, the data becomes linear and a linear model is able to fit the data very closely with a negative slope of -4.605. 
+
+Next, we plotted the residuals of the model to visualize the distribution of each data point.
+
+```{r echo=FALSE}
+res <- resid(log_model)
+plot(fitted(log_model), res, xlab='Predicted Gamma Ray Intensity', ylab = 'Residuals', main = 'Residual vs. Fitted Plot of Log Model')
+abline(0,0)
+```
+
+Addtionally, we plotted a QQ plot of these residuals to ensure that they are normally distributed.
+
+```{r echo=FALSE}
+qqnorm(res)
+qqline(res)
+```
+
+The plot of the residuals and the QQ plot also support the idea that the data is now linear after the log transfomation, as the resisuals are more randomly scattered and they fall close to the normal line on the QQ plot.
+
+### Analysis
+
+Based on our visualizations, the log transformation is a fitting transformation for our data to fit a linear model. To reinforce this idea, we can test whether our data comes from a normally distributed population with a Shapiro-Wilk test. Our null hypothesis is that our data does come from a normally distributed population.
+
+```{r}
+set.seed(123)
+shapiro_result <- shapiro.test(data$lggain)
+print(shapiro_result)
+```
+With a p-value of 0.0002461< 0.05, we reject the null hypothesis. Although this suggests that our data is _not_ normally distributed, it is a vast improvement from the previous p-value of 4.599 * 10ˆ(-9). 
+
+### Conclusion
+
+The log transformation on predicted gamma ray density is an appropriate for fitting the data to a linear model. The visualizations of the model itself, its residuals, as well as a QQ plot show us that the log transformation allowed the data to fit a linear model very well. Although the log transfomation failed to completely transform the distribution of predicted gamma ray density into a normal distribution, it significantly reduced the non-linearity of its distribution. 
 
 ## Question 3: ROBUSTNESS
 
