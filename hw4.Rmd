@@ -3,8 +3,8 @@ title: "hw4"
 author: "Student 1 and Student 2"
 date: "2024-11-21"
 output:
-  pdf_document: default
   word_document: default
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -283,42 +283,31 @@ plot(data$gain, data$density,
 # Add regression line
 abline(inverted_model, col = 'red')
 
-# Add confidence intervals as shaded bands
+# Add prediction intervals as shaded bands
 # Sort values for proper plotting
 sorted_indices <- order(data$gain)
-lines(data$gain[sorted_indices], predictions[sorted_indices, "lwr"], col = "green", lty = 2) # Lower CI
-lines(data$gain[sorted_indices], predictions[sorted_indices, "upr"], col = "green", lty = 2) # Upper CI
+lines(data$gain[sorted_indices], predictions[sorted_indices, "lwr"], col = "green", lty = 2) # Lower PI
+lines(data$gain[sorted_indices], predictions[sorted_indices, "upr"], col = "green", lty = 2) # Upper PI
 
 # Alternatively, use polygon to fill the area
 polygon(c(data$gain[sorted_indices], rev(data$gain[sorted_indices])),
         c(predictions[sorted_indices, "lwr"], rev(predictions[sorted_indices, "upr"])),
         col = rgb(0, 1, 0, 0.2), border = NA) # Semi-transparent green
 ```
-Above, we have our regression line for the inverse graph plotted with a 95% confidence interval for predicting density of polytheylene blocks from gamma ray intensity (gain). From eyeballing the graph, it seems as though we mostly capture the true density of polyethylene blocks in our 95% confidence interval when the gamma ray intensity is around 25 or close to 300.
+Above, we have our regression line for the inverse graph plotted with a prediction interval for estimating _specific_ densities of polytheylene blocks from gamma ray intensity (gain) while incorporating the individual variability. 
 
 ### Analysis
-**POINT ESTIMATE FOR GAMMA RAY INTENSITY (GAIN) OF 38.6 AND 426.7**
-```{r echo=FALSE}
-# Extract the coefficients of the inverted model
-coefficients <- coef(inverted_model)
-beta_0 <- coefficients[1]
-beta_1 <- coefficients[2]
 
-# Make point estimate prediction
-point_estimate1 <- beta_0 + beta_1 * 38.6 # Point estimate: 0.491
-point_estimate2 <- beta_0 + beta_1 * 426.7 # Point estimate: -0.105
-```
-
-**PREDICTION INTERVALS FOR GAMMA RAY INTENSITY (GAIN) OF 38.6 AND 426.7**
+**Predictions for Gamma Ray Intensity (Gain) OF 38.6 and 426.7**
 ``` {r echo=FALSE}
 # Make prediction intervals
 predictions <- predict(inverted_model, newdata = data.frame(gain = data$gain), interval = "prediction")
 # Specific prediction intervals for gamma ray intensities 38.6 and 426.7
 specific_preds <- predict(inverted_model, newdata = data.frame(gain = c(38.6, 426.7)), interval = "prediction")
+low_point_estimate <- specific_preds[1] # Point estimate for gamma ray intensity 38.6
+high_point_estimate <- specific_preds[2] # Point estimate for gamma ray intensity 426.7
 ```
 The inverted model predicts polyethylene blocks with a gain of 38.6 have a density that falls in the range of [0.344, 0.686] with a point estimate at 0.511. It also predicts polyethylene blocks with a gain of 426.7 have a density that falls in the range of [-0.458, 0.01] with a point estimate at -0.278.
-
-### Analysis
 
 ```{r echo=FALSE}
 # Plot the scatterplot
@@ -328,23 +317,23 @@ plot(data$gain, data$density,
      ylab = 'Density of Polyethylene Blocks')
 
 abline(inverted_model, col = 'red') # Add regression line
-abline(v = c(38.6, 426.7), col = "blue", lwd = 2, lty = 2) # Add vertical line to show prediction
+abline(v = c(38.6, 426.7), col = "blue", lwd = 2, lty = 2) # Add vertical lines to show prediction
 
-# Add confidence intervals as shaded bands
+# Add prediction intervals as shaded bands
 # Sort values for proper plotting
 sorted_indices <- order(data$gain)
-lines(data$gain[sorted_indices], predictions[sorted_indices, "lwr"], col = "green", lty = 2) # Lower CI
-lines(data$gain[sorted_indices], predictions[sorted_indices, "upr"], col = "green", lty = 2) # Upper CI
+lines(data$gain[sorted_indices], predictions[sorted_indices, "lwr"], col = "green", lty = 2) # Lower PI
+lines(data$gain[sorted_indices], predictions[sorted_indices, "upr"], col = "green", lty = 2) # Upper PI
 
 # Alternatively, use polygon to fill the area
 polygon(c(data$gain[sorted_indices], rev(data$gain[sorted_indices])),
         c(predictions[sorted_indices, "lwr"], rev(predictions[sorted_indices, "upr"])),
         col = rgb(0, 1, 0, 0.2), border = NA) # Semi-transparent green
 ```
-In the graph above, the predictions for the gamma ray intensities of 38.6 and 426.7 are denoted by where the dashed blue lines intersect with the red line, our regression/ prediction line. The green line is our prediction interval, which represents the range where a single observation is expected to fall. Note that for the gamma ray intensity of 38.6, our prediction is fairly close to the observed density value of 0.508; indeed, our point estimate of 0.511 is very close to the true value of 0.508 and the true value does lie in our prediction interval. However, for the gamma ray intensity of 426.7, we predict a density of -0.278. This is extrapolation, and does not make sense in our context, since we cannot have negative gamma ray densities. The true density for a gamma ray intensity of 426.7 was 0.001. The reason why our model is unable to estimate high values accurately is because the data does not follow a linear pattern, but we are using a linear model to make inferences on it.
+In the graph above, the predictions for the gamma ray intensities of 38.6 and 426.7 are denoted by where the dashed blue lines intersect with the red line, our regression/ prediction line. The green bar is our prediction interval, which represents the range where a single observation is expected to fall. Note that for the gamma ray intensity of 38.6, our prediction is fairly close to the observed density value; indeed, our point estimate of 0.511 is very close to the true value of 0.508 and the true value does lie in our prediction interval. However, for the gamma ray intensity of 426.7, we predict a density of -0.278. This is extrapolation, and does not make sense in our context, since we cannot have negative gamma ray densities. The true density for a gamma ray intensity of 426.7 was 0.001. The reason why our model is unable to estimate high values accurately is because the data does not follow a linear pattern, but we are using a linear model to make inferences on it.
 
 ### Conclusion
-The reverse prediction was fairly accurate for the lower estimate where the gamma ray intensity was 38.6. However, for a higher value, such as 426.7, the model failed to make a reasonable prediction such it yielded a negative number. Since our graph is nonlinear, it is evident that most accurate predictions made occur between low and moderately-high gamma ray intensity levels. Our graph's concaved curve means that data in the middle sector will most likely be overestimated, and extreme high values will wrongfully be estimated as negative. Likewise, extreme low values will incorrectly be underestimated.
+The reverse prediction was fairly accurate for the lower estimate where the gamma ray intensity was 38.6. However, for a higher value, such as 426.7, the model failed to make a reasonable prediction such it yielded a negative number. Since our graph is nonlinear, it is evident that most accurate predictions made occur between low and moderately-high gamma ray intensity levels. Our graph's concaved up curve means that data in the middle sector will most likely be overestimated, and extreme high values will wrongfully be estimated as negative. Likewise, extreme low values will incorrectly be underestimated.
 
 
 ## Question 6: CROSS-VALIDATION
@@ -431,7 +420,7 @@ There are some differences between the two models. The first model has a higher 
 
 ### Conclusion
 
-The exclusion of densities equal to 0.508 and 0.001 respectively allowed the model to more accurately predict the density of data points that lie outside the range [0.001, 0.508]. This can be seen in the visualizations as well as reflected in the confidence interval for the gain of 38.6
+The exclusion of densities equal to 0.508 and 0.001 respectively allowed the model to more accurately predict the density of data points that lie outside the range [0.001, 0.508]. This can be seen in the visualizations as well as reflected in the confidence interval for the gain of 38.6.
 
 # Advanced Analysis
 In the basic analysis, we fit our data to a linear model and explore why a linear model is not fully representative of the data. In the following section, we will create a fit our data to a nonlinear model using nls(). We are interested in exploring accurately how a **nonlinear least squares** model predicts gamma ray intensity.
@@ -453,7 +442,8 @@ plot(data$density, data$gain,
 lines(data$density, predictions, col='red')
 
 ```
-Above, we can the the nonlinear least squares model almost fits the data perfectly!
+Above, we can see the nonlinear least squares model almost fits the data perfectly!
+
 ### Analysis
 ```{r echo=FALSE}
 pander(summary(nls_model))
@@ -464,6 +454,7 @@ r_squared <- 1 - (rss / tss) # 0.998
 mse <- mean(res ** 2) # 35.345
 ```
 After looking at the summary statistics of our NLS Model, we can see we have an R^2 value of 0.998 and an MSE of 35.345.
+
 ### Conclusion
 The nonlinear least squares model is a great fit for our data! The R^2 value of 0.998 means that **99.8% of the variance** in the intensity of gamma rays (gain) can be explain by the model. The MSE value of 35.346 is also good; since our Gain values range from ```min(data$gain)``` = 16.2 to ```max(data$gain)``` = 436, the model's predictions are generally close to the actual values. The errors are not excessively large. The average squared error is relatively small compared to the entire range.
 
