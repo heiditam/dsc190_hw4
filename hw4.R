@@ -47,3 +47,7 @@ print(shapiro_result)
 # QUESTION 5
 
 # QUESTION 6
+dataset <- read.table("gauge.txt",  header = TRUE)
+no_0.508 <- dataset[dataset$density != 0.508, ]
+print(no_0.508)
+
