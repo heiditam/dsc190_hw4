@@ -3,10 +3,10 @@ title: "hw4"
 author: "Student 1 and Student 2"
 date: "2024-11-21"
 output:
-  html_document:
-    df_print: paged
   pdf_document: default
   word_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -312,7 +312,7 @@ point_estimate2 <- beta_0 + beta_1 * 426.7 # Point estimate: -0.105
 **PREDICTION INTERVALS FOR GAMMA RAY INTENSITY (GAIN) OF 38.6 AND 426.7**
 ``` {r echo=FALSE}
 # Make prediction intervals
-predictions <- predict(inverted_model, newdata = data.frame(gain=c(38.6, 426.7)), interval = "prediction")
+predictions <- predict(inverted_model, newdata = data.frame(gain = data$gain), interval = "prediction")
 ```
 The inverted model predicts polyethylene blocks with a gain of 38.6 have a density that falls in the range of [0.295, 0.686] with a point estimate at 0.491. It also predicts polyethylene blocks with a gain of 426.7 have a density that falls in the range of [-0.305, 0.01] with a point estimate at -0.105.
 
@@ -394,6 +394,8 @@ nls_fx <- function(density, A, beta){
   A * exp(beta * density) # from the write-up: g = A * e^(beta * d)
 }
 nls_model <- nls(gain ~ nls_fx(density, A, beta), data = data, start = list(A = 400, beta = -1))
+
+predictions <- predict(nls_model, newdata = data.frame(density = data$density))
 
 # Plot the scatterplot
 plot(data$density, data$gain,
