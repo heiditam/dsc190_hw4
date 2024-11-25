@@ -23,7 +23,7 @@ Student 1 mainly worked on questions 1, 3, 5, and the advanced analysis.
 
 ## Student 2
 
-Student 2 mainly worked on questions ...
+Student 2 mainly worked on questions 2, 4, 6, and the introduction and conclusion.
 
 \pagebreak
 
@@ -32,8 +32,10 @@ Student 2 mainly worked on questions ...
 # Introduction
 
 ### Data
+The data represents the measurements of a gamma transmission snow gauge and the densities of polyethylene blocks from calibration experiments in order to accurately measure the density of snow. There are 10 measurements of gain taken for 9 different densities of polyethylene blocks.
 
 ### Objective
+In order to calibrate the gauge to accurately predict snow density from a gamma transmission snow gauge, we must first fit a function that maps density to gamma ray intensity and get the inverse to map gamma ray density to snow density. In this report, we explore the non-linear relationship between these two mesurements and attempt to calibrate this model ourselves.
 
 \pagebreak
 
@@ -381,6 +383,33 @@ polygon(c(no_0.508$gain[sorted_indices], rev(no_0.508$gain[sorted_indices])),
 
 We also performed this test on a subset of the data without the block of density 0.001. 
 
+```{r}
+dataset <- read.table("gauge.txt",  header = TRUE)
+no_0.001 <- dataset[dataset$density != 0.001, ]
+
+inverted_model <- lm(density ~ gain, data = no_0.001) 
+predictions <- predict(inverted_model, newdata = data.frame(gain = no_0.001$gain), interval = 'confidence', level = 0.95)
+
+# Plot the scatterplot
+plot(no_0.001$gain, no_0.001$density,
+     main = 'Inverse Model without Density = 0.001',
+     xlab = 'Gamma Ray Intensity',
+     ylab = 'Density of Polyethylene Blocks')
+
+# Add regression line
+abline(inverted_model, col = 'red')
+
+# Add confidence intervals as shaded bands
+# Sort values for proper plotting
+sorted_indices <- order(no_0.001$gain)
+lines(no_0.001$gain[sorted_indices], predictions[sorted_indices, "lwr"], col = "green", lty = 2) # Lower CI
+lines(no_0.001$gain[sorted_indices], predictions[sorted_indices, "upr"], col = "green", lty = 2) # Upper CI
+
+# Alternatively, use polygon to fill the area
+polygon(c(no_0.001$gain[sorted_indices], rev(no_0.001$gain[sorted_indices])),
+        c(predictions[sorted_indices, "lwr"], rev(predictions[sorted_indices, "upr"])),
+        col = rgb(0, 1, 0, 0.2), border = NA) # Semi-transparent green
+```
 
 ### Analysis
 
