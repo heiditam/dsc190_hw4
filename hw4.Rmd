@@ -1,8 +1,12 @@
 ---
 title: "hw4"
-author: Student 1 and Student 2
-output: pdf_document
+author: "Student 1 and Student 2"
 date: "2024-11-21"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
